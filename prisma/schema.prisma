@@ -1,0 +1,201 @@
+// CareerHub - Job Portal Schema
+// Using SQLite for development, designed for easy migration to PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS (via String constants) ====================
+
+// ==================== USER & AUTH ====================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  image         String?
+  role          String   @default("CANDIDATE") // CANDIDATE, EMPLOYER, ADMIN
+  phone         String?
+  bio           String?
+  location      String?
+  website       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  candidateProfile CandidateProfile?
+  employerProfile  EmployerProfile?
+  applications     Application[]
+  posts            Post[]
+  subscriptions    Subscription[]
+  publishedJobs    Job[]             @relation("JobPublisher")
+  savedJobs        SavedJob[]
+}
+
+model CandidateProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  resumeUrl     String?  // URL to uploaded CV/Resume
+  skills        String?  // JSON array of skills
+  experience    String?  // Years of experience
+  education     String?  // Highest education level
+  linkedinUrl   String?
+  githubUrl     String?
+  portfolioUrl  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmployerProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  companyName String
+  companyLogo String?
+  industry    String?
+  companySize String?  // SMALL, MEDIUM, LARGE, ENTERPRISE
+  description String?  // Company description
+  website     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==================== JOBS ====================
+
+model Job {
+  id            String   @id @default(cuid())
+  title         String
+  description   String   // Full job description (Markdown supported)
+  company       String
+  companyLogo   String?
+  location      String
+  locationType  String   @default("REMOTE") // REMOTE, ONSITE, HYBRID
+  category      String   // e.g., "Engineering", "Design", "Marketing"
+  salaryMin     Int?
+  salaryMax     Int?
+  salaryCurrency String  @default("USD")
+  jobType       String   @default("FULL_TIME") // FULL_TIME, PART_TIME, CONTRACT, FREELANCE, INTERNSHIP
+  experienceLevel String @default("MID") // JUNIOR, MID, SENIOR, LEAD, EXECUTIVE
+  tags          String?  // JSON array of tags
+  applyUrl      String?  // External application URL (for scraped jobs)
+  contactEmail  String?  // Internal application contact email
+  contactName   String?
+  requirements  String?  // JSON array of requirements
+  benefits      String?  // JSON array of benefits
+  isExternal    Boolean  @default(false) // true = scraped/imported, false = internal
+  isFeatured    Boolean  @default(false) // Featured/promoted jobs
+  isPublished   Boolean  @default(true)
+  fingerprint   String   @unique // Hash of title + company + location for deduplication
+  sourceUrl     String?  // Original URL if scraped
+  sourceName    String?  // Name of the source (e.g., "LinkedIn", "Indeed")
+  lastSeenAt    DateTime @default(now()) // For external jobs, last time seen on source
+  expiresAt     DateTime?
+  viewCount     Int      @default(0)
+  applicantCount Int     @default(0)
+  publishedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  publisherId   String?
+  publisher     User?    @relation("JobPublisher", fields: [publisherId], references: [id], onDelete: SetNull)
+  applications  Application[]
+  savedBy       SavedJob[]
+}
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  userId    String
+  jobId     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+}
+
+// ==================== APPLICATIONS ====================
+
+model Application {
+  id          String   @id @default(cuid())
+  jobId       String
+  userId      String?
+  fullName    String
+  email       String
+  phone       String?
+  coverLetter String?
+  resumeUrl   String?  // URL to uploaded CV
+  status      String   @default("PENDING") // PENDING, REVIEWED, SHORTLISTED, REJECTED, ACCEPTED
+  message     String?  // Admin/employer message to candidate
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// ==================== BLOG ====================
+
+model Post {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String   // Markdown content
+  excerpt     String?  // Short summary for SEO/cards
+  coverImage  String?
+  category    String?  // e.g., "Career Tips", "Industry News", "Interview Guide"
+  tags        String?  // JSON array
+  isPublished Boolean  @default(false)
+  publishedAt DateTime?
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  authorId  String
+  author    User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+// ==================== SUBSCRIPTIONS / JOB ALERTS ====================
+
+model Subscription {
+  id         String   @id @default(cuid())
+  email      String
+  name       String?
+  frequency  String   @default("DAILY") // DAILY, WEEKLY, MONTHLY
+  categories String?  // JSON array of preferred categories
+  locations  String?  // JSON array of preferred locations
+  keywords   String?  // JSON array of keywords
+  isActive   Boolean  @default(true)
+  lastSentAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([email])
+}
+
+// ==================== CATEGORIES ====================
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?  // Lucide icon name
+  jobCount    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
