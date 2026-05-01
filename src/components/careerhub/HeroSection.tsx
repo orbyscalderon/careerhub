@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MapPin, Briefcase, Building2, TrendingUp, ArrowRight } from 'lucide-react';
+import { Search, Briefcase, Building2, TrendingUp, ArrowRight } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { JOB_CATEGORIES } from '@/lib/helpers';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-const STATS = [
-  { icon: Briefcase, value: '500+', label: 'Jobs Posted' },
-  { icon: Building2, value: '200+', label: 'Companies' },
-  { icon: TrendingUp, value: '50+', label: 'Categories' },
-];
 
 const container = {
   hidden: { opacity: 0 },
@@ -38,6 +32,26 @@ export default function HeroSection() {
   const { navigate, setSearchQuery, setSelectedCategory } = useAppStore();
   const [heroSearch, setHeroSearch] = useState('');
   const [heroCategory, setHeroCategory] = useState('');
+  const [stats, setStats] = useState<{ totalJobs: number; totalCompanies: number; totalCategories: number } | null>(null);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/stats');
+        if (res.ok) {
+          const data = await res.json();
+          setStats({
+            totalJobs: data.totalJobs || 0,
+            totalCompanies: data.totalCompanies || 0,
+            totalCategories: data.totalCategories || 0,
+          });
+        }
+      } catch {
+        // Stats unavailable
+      }
+    }
+    fetchStats();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +59,12 @@ export default function HeroSection() {
     if (heroCategory) setSelectedCategory(heroCategory);
     navigate('jobs');
   };
+
+  const statItems = [
+    { icon: Briefcase, value: stats?.totalJobs ?? 0, label: 'Jobs Posted' },
+    { icon: Building2, value: stats?.totalCompanies ?? 0, label: 'Companies' },
+    { icon: TrendingUp, value: stats?.totalCategories ?? 0, label: 'Categories' },
+  ];
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800">
@@ -136,13 +156,13 @@ export default function HeroSection() {
             variants={item}
             className="mt-12 flex items-center justify-center gap-8 sm:gap-12"
           >
-            {STATS.map((stat) => (
+            {statItems.map((stat) => (
               <div key={stat.label} className="flex items-center gap-2 text-white">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm">
                   <stat.icon className="h-5 w-5" />
                 </div>
                 <div className="text-left">
-                  <p className="text-lg font-bold">{stat.value}</p>
+                  <p className="text-lg font-bold">{stat.value.toLocaleString()}</p>
                   <p className="text-xs text-emerald-200/80">{stat.label}</p>
                 </div>
               </div>

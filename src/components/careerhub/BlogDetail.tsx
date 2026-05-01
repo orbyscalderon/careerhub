@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   Calendar,
   Eye,
-  User,
   BookOpen,
   Clock,
 } from 'lucide-react';
@@ -26,9 +25,10 @@ interface BlogDetailProps {
 }
 
 export default function BlogDetail({ postSlug }: BlogDetailProps) {
-  const { navigate } = useAppStore();
+  const { navigate, viewPost } = useAppStore();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+  const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     async function fetchPost() {
@@ -38,6 +38,16 @@ export default function BlogDetail({ postSlug }: BlogDetailProps) {
         if (res.ok) {
           const data = await res.json();
           setPost(data);
+          // Fetch related posts by category
+          if (data.category) {
+            const relatedRes = await fetch(`/api/blog?category=${encodeURIComponent(data.category)}&limit=3`);
+            if (relatedRes.ok) {
+              const relatedData = await relatedRes.json();
+              const posts = relatedData.posts || relatedData;
+              // Exclude current post from related
+              setRelatedPosts(posts.filter((p: Post) => p.slug !== postSlug).slice(0, 2));
+            }
+          }
         }
       } catch {
         // silently handle
@@ -172,25 +182,38 @@ export default function BlogDetail({ postSlug }: BlogDetailProps) {
         </div>
       </article>
 
-      {/* Related Posts Placeholder */}
-      <div className="mx-auto max-w-3xl">
-        <Separator className="my-8" />
-        <h2 className="text-xl font-semibold mb-4">Related Posts</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <Card key={i} className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
-              <div className="aspect-[16/9] bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
-                <BookOpen className="h-8 w-8 text-emerald-200" />
-              </div>
-              <CardContent className="p-4">
-                <Skeleton className="h-4 w-2/3 mb-2" />
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-4/5 mt-1" />
-              </CardContent>
-            </Card>
-          ))}
+      {/* Related Posts */}
+      {relatedPosts.length > 0 && (
+        <div className="mx-auto max-w-3xl">
+          <Separator className="my-8" />
+          <h2 className="text-xl font-semibold mb-4">Related Posts</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {relatedPosts.map((related) => (
+              <Card
+                key={related.id}
+                className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => viewPost(related.slug)}
+              >
+                {related.coverImage ? (
+                  <div className="aspect-[16/9] overflow-hidden">
+                    <img src={related.coverImage} alt={related.title} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="aspect-[16/9] bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+                    <BookOpen className="h-8 w-8 text-emerald-200" />
+                  </div>
+                )}
+                <CardContent className="p-4">
+                  <p className="font-semibold text-sm line-clamp-2">{related.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                    {related.excerpt || related.content?.slice(0, 100) + '...'}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </motion.div>
   );
 }

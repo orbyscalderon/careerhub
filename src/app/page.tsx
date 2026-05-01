@@ -216,8 +216,8 @@ We may update this Privacy Policy from time to time. We will notify you of any c
 ## 10. Contact Us
 
 If you have questions about this Privacy Policy, please contact us at:
-- **Email:** privacy@careerhub.com
-- **Address:** CareerHub Inc., 123 Career Street, San Francisco, CA 94102`}
+- **Email:** TODO_SET_YOUR_PRIVACY_EMAIL
+- **Address:** TODO_SET_YOUR_COMPANY_ADDRESS`}
       />
     </div>
   );
@@ -307,8 +307,8 @@ These terms are governed by the laws of the State of California, without regard 
 ## 10. Contact
 
 For questions about these Terms of Service, please contact us at:
-- **Email:** legal@careerhub.com
-- **Address:** CareerHub Inc., 123 Career Street, San Francisco, CA 94102`}
+- **Email:** TODO_SET_YOUR_LEGAL_EMAIL
+- **Address:** TODO_SET_YOUR_COMPANY_ADDRESS`}
       />
     </div>
   );
@@ -379,7 +379,7 @@ We may update this Cookie Policy from time to time. Changes will be posted on th
 ## 6. Contact Us
 
 If you have questions about our use of cookies, please contact us at:
-- **Email:** privacy@careerhub.com`}
+- **Email:** TODO_SET_YOUR_PRIVACY_EMAIL`}
       />
     </div>
   );

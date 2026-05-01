@@ -1,11 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Building2, UserCircle, ArrowRight } from 'lucide-react';
-import { DEMO_ACCOUNTS } from '@/lib/auth';
+import { LogIn, Loader2 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -19,38 +18,18 @@ interface LoginDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const ACCOUNT_OPTIONS = [
-  {
-    key: 'admin@careerhub.com',
-    role: 'Admin',
-    description: 'Full access to manage jobs, blog posts, and applications.',
-    icon: Shield,
-    color: 'text-rose-600 bg-rose-50',
-  },
-  {
-    key: 'employer@techcorp.com',
-    role: 'Employer',
-    description: 'Post and manage job listings for your company.',
-    icon: Building2,
-    color: 'text-amber-600 bg-amber-50',
-  },
-  {
-    key: 'candidate@email.com',
-    role: 'Candidate',
-    description: 'Browse jobs, apply to positions, and set alerts.',
-    icon: UserCircle,
-    color: 'text-emerald-600 bg-emerald-50',
-  },
-];
-
 export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { login } = useAppStore();
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (email: string) => {
-    const account = DEMO_ACCOUNTS[email];
-    if (account) {
-      login(account);
-      onOpenChange(false);
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      // Real Google OAuth sign-in via NextAuth
+      // The actual auth flow will be handled by NextAuth.js on the server
+      window.location.href = '/api/auth/signin/google';
+    } catch {
+      setLoading(false);
     }
   };
 
@@ -60,43 +39,59 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         <DialogHeader>
           <DialogTitle className="text-center text-xl">Welcome to CareerHub</DialogTitle>
           <DialogDescription className="text-center">
-            Choose a demo account to explore the platform.
+            Sign in to access your account and manage your job search.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-3 pt-2">
-          {ACCOUNT_OPTIONS.map((option) => (
-            <motion.div
-              key={option.key}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
+        <div className="flex flex-col gap-3 pt-2">
+          <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+            <Button
+              className="w-full h-12 text-base font-medium gap-3"
+              variant="outline"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
             >
-              <Card
-                className="cursor-pointer transition-all hover:shadow-md hover:border-emerald-200"
-                onClick={() => handleLogin(option.key)}
-              >
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${option.color}`}>
-                    <option.icon className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm">{option.role}</p>
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                        Demo
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                      {option.description}
-                    </p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <svg className="h-5 w-5" viewBox="0 0 24 24">
+                  <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                    fill="#4285F4"
+                  />
+                  <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853"
+                  />
+                  <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    fill="#FBBC05"
+                  />
+                  <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335"
+                  />
+                </svg>
+              )}
+              Continue with Google
+            </Button>
+          </motion.div>
         </div>
         <p className="text-center text-xs text-muted-foreground pt-1">
-          This is a demo environment. No real authentication required.
+          By signing in, you agree to our{' '}
+          <button
+            onClick={() => { onOpenChange(false); useAppStore.getState().navigate('legal-terms'); }}
+            className="underline hover:text-foreground"
+          >
+            Terms of Service
+          </button>{' '}
+          and{' '}
+          <button
+            onClick={() => { onOpenChange(false); useAppStore.getState().navigate('legal-privacy'); }}
+            className="underline hover:text-foreground"
+          >
+            Privacy Policy
+          </button>
+          .
         </p>
       </DialogContent>
     </Dialog>

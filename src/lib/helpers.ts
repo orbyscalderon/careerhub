@@ -81,4 +81,5 @@ export const USER_ROLES = ['CANDIDATE', 'EMPLOYER', 'ADMIN'] as const;
 
 export const APPLICATION_STATUSES = ['PENDING', 'REVIEWED', 'SHORTLISTED', 'REJECTED', 'ACCEPTED'] as const;
 
-export const ADSENSE_CLIENT_ID = 'ca-pub-XXXXXXXXXXXXXXXX';
+// Google AdSense - Set via environment variable: NEXT_PUBLIC_ADSENSE_CLIENT_ID
+export const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || '';

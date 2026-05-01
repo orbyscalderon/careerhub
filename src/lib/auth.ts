@@ -1,5 +1,5 @@
 // CareerHub - Auth Utilities
-// Simplified auth for sandbox environment using localStorage + API mock
+// Session management using localStorage + API authentication
 
 export interface AuthUser {
   id: string;
@@ -15,28 +15,6 @@ export interface AuthSession {
 }
 
 const SESSION_KEY = 'careerhub_session';
-
-// Pre-configured demo accounts for sandbox
-export const DEMO_ACCOUNTS: Record<string, AuthUser> = {
-  'admin@careerhub.com': {
-    id: 'demo-admin-id',
-    email: 'admin@careerhub.com',
-    name: 'Admin User',
-    role: 'ADMIN',
-  },
-  'employer@techcorp.com': {
-    id: 'demo-employer-id',
-    email: 'employer@techcorp.com',
-    name: 'Sarah Johnson',
-    role: 'EMPLOYER',
-  },
-  'candidate@email.com': {
-    id: 'demo-candidate-id',
-    email: 'candidate@email.com',
-    name: 'Alex Rivera',
-    role: 'CANDIDATE',
-  },
-};
 
 // Client-side session management
 export function getStoredSession(): AuthSession | null {

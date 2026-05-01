@@ -121,3 +121,36 @@ Stage Summary:
 - Job application flow working with form and file upload
 - AdSense placeholder components integrated
 - Legal pages (Privacy, Terms, Cookies) complete
+
+---
+Task ID: 11
+Agent: Main
+Task: Remove all demo/mock data and prepare for real data integration
+
+Work Log:
+- Deleted prisma/seed.ts (648 lines of demo data: 10 categories, 3 users, 16 jobs, 4 blog posts, profiles)
+- Deleted examples/websocket/ folder (demo chat server and frontend)
+- Deleted src/app/api/auth/demo/route.ts (demo auth endpoint)
+- Cleaned src/lib/auth.ts: removed DEMO_ACCOUNTS constant (3 hardcoded accounts), kept session management
+- Rebuilt src/components/careerhub/LoginDialog.tsx: replaced demo account picker with Google OAuth sign-in button
+- Updated HeroSection.tsx: removed hardcoded stats (500+/200+/50+), now fetches from /api/stats
+- Updated StatsSection.tsx: removed fake fallback numbers (542/215/1250/3200), defaults to 0
+- Updated CategoryGrid.tsx: removed random fallback data (Math.random), shows empty state when no categories
+- Updated BlogDetail.tsx: removed static skeleton "Related Posts", now fetches real related posts from /api/blog
+- Created /api/stats/route.ts: new endpoint returning real DB stats (totalJobs, totalCompanies, totalCategories, totalCandidates, totalApplications)
+- Cleaned layout.tsx: removed placeholder google verification code, cleaned AdSense comment
+- Cleaned helpers.ts: removed hardcoded ADSENSE_CLIENT_ID, now reads from NEXT_PUBLIC_ADSENSE_CLIENT_ID env var
+- Cleaned AdSlot.tsx: removed commented-out placeholder, conditionally renders real AdSense when configured
+- Cleaned applications route: replaced "Simulate email notification" comment with TODO for Resend integration
+- Cleaned legal pages in page.tsx: replaced fake email/addresses with TODO_SET_YOUR_* placeholders
+- Cleared all data from SQLite database (0 users, 0 jobs, 0 posts, 0 categories, 0 applications)
+
+Stage Summary:
+- All demo/mock data completely removed from codebase
+- Database wiped clean and ready for real data
+- All components show empty/loading states instead of fake data
+- LoginDialog now uses real Google OAuth flow
+- Statistics are fully dynamic from database
+- AdSense integration is env-variable-driven
+- Zero ESLint errors
+- All APIs return empty results as expected

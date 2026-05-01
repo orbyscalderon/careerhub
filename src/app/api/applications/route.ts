@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       data: { applicantCount: { increment: 1 } },
     });
 
-    // Simulate email notification
+    // TODO: Send email notification to employer via Resend
     console.log(
       `[Email Notification] New application received:\n` +
       `  Job: ${job.title} at ${job.company}\n` +

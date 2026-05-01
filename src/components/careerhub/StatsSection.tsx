@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, useInView, useSpring, useMotionValue } from 'framer-motion';
 import { Briefcase, Building2, Users, FileCheck2 } from 'lucide-react';
 
@@ -83,7 +83,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
           setApiStats(data);
         }
       } catch {
-        // Use defaults
+        // Stats unavailable
       }
     }
     fetchStats();
@@ -92,25 +92,25 @@ export default function StatsSection({ stats }: StatsSectionProps) {
   const statItems = [
     {
       icon: Briefcase,
-      value: apiStats?.totalJobs ?? 542,
+      value: apiStats?.totalJobs ?? 0,
       label: 'Jobs Posted',
       suffix: '+',
     },
     {
       icon: Building2,
-      value: apiStats?.totalCompanies ?? 215,
+      value: apiStats?.totalCompanies ?? 0,
       label: 'Companies',
       suffix: '+',
     },
     {
       icon: Users,
-      value: apiStats?.totalCandidates ?? 1250,
+      value: apiStats?.totalCandidates ?? 0,
       label: 'Candidates',
       suffix: '+',
     },
     {
       icon: FileCheck2,
-      value: apiStats?.totalApplications ?? 3200,
+      value: apiStats?.totalApplications ?? 0,
       label: 'Applications',
       suffix: '+',
     },

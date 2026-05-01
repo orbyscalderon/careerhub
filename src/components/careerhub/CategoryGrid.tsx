@@ -15,12 +15,12 @@ import {
   Users,
   Cpu,
   GraduationCap,
+  Inbox,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import type { Category } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
   Engineering: Code2,
@@ -63,23 +63,9 @@ export default function CategoryGrid() {
         if (res.ok) {
           const data = await res.json();
           setCategories(data.categories || data);
-        } else {
-          // Fallback to default categories
-          const defaultCategories: Category[] = [
-            'Engineering', 'Design', 'Marketing', 'Sales', 'Product',
-            'Data Science', 'DevOps', 'Customer Support', 'Finance', 'Human Resources',
-          ].map((name, i) => ({
-            id: `cat-${i}`,
-            name,
-            slug: name.toLowerCase().replace(/\s+/g, '-'),
-            description: null,
-            icon: null,
-            jobCount: Math.floor(Math.random() * 50) + 10,
-          }));
-          setCategories(defaultCategories);
         }
       } catch {
-        // silent fallback
+        // silent fail
       } finally {
         setLoading(false);
       }
@@ -93,6 +79,20 @@ export default function CategoryGrid() {
         {Array.from({ length: 10 }).map((_, i) => (
           <Skeleton key={i} className="h-28 rounded-xl" />
         ))}
+      </div>
+    );
+  }
+
+  if (categories.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+          <Inbox className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <p className="mt-4 text-lg font-semibold">No categories yet</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Categories will appear here once they are added to the platform.
+        </p>
       </div>
     );
   }
